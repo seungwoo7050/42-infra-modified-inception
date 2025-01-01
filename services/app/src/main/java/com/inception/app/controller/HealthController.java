@@ -18,7 +18,7 @@ public class HealthController {
     public Map<String, Object> healthDb() {
         try {
             Integer one = jdbc.queryForObject("SELECT 1", Integer.class);
-            Long count = jdbc.queryForObject("SELECT COUNT(*) FROM health_ckeck", Long.class);
+            Long count = jdbc.queryForObject("SELECT COUNT(*) FROM health_check", Long.class);
 
             return Map.of(
                 "dbOk", true,
