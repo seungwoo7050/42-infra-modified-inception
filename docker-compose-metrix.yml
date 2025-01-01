@@ -1,0 +1,77 @@
+services:
+  db-mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: appdb
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db-mysql-data:/var/lib/mysql
+      - ./services/db/init-mysql.sql:/docker-entrypoint-initdb.d/init.sql:ro
+  
+  db-postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: appdb
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db-postgres-data:/var/lib/postgresql/data
+      - ./services/db/init-postgres.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+  app-mysql:
+    build:
+      context: ./services/app
+    depends_on:
+      - db-mysql
+    environment:
+      PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:mysql://db-mysql:3306/appdb
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "8081:8080"
+  
+  app-postgres:
+    build:
+      context: ./services/app
+    depends_on:
+      - db-postgres
+    environment:
+      PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-postgres:5432/appdb
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "8082:8080"
+
+  app-compare:
+    build:
+      context: ./services/app
+    depends_on:
+      - db-mysql
+      - db-postgres
+    environment:
+      PORT: 8080
+
+      # 기본 데이터베이스는 "primary(mysql)"로 설정해서 앱 부팅 실패를 피함
+      SPRING_DATASOURCE_URL: jdbc:mysql://db-mysql:3306/appdb
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+
+      # compare 용도
+      SPRING_DATASOURCE_URL_PRIMARY: jdbc:mysql://db-mysql:3306/appdb
+      SPRING_DATASOURCE_URL_PRIMARY: jdbc:postgresql://db-postgres:5432/appdb
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "8083:8080"
+
+volumes:
+  db-mysql-data:
+  db-postgres-data:
