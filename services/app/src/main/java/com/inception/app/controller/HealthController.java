@@ -13,7 +13,7 @@ public class HealthController {
         this.jdbc = jdbc;
     }
 
-    @GetMapping("/health")
+    @GetMapping("/health-db")
     public Map<String, Object> healthDb() {
         try {
             Integer one = jdbc.queryForObject("SELECT 1", Integer.class);
