@@ -1,0 +1,31 @@
+services:
+  db-mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: appdb
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-mysql-data:/var/lib/mysql
+      - ./services/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+  app:
+    build:
+      context: ./services/app
+    depends_on:
+      - db-mysql
+    environment:
+      PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:mysql://db-mysql:3306/appdb
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "8080:8080"
+
+volumes:
+  db-mysql-data:
