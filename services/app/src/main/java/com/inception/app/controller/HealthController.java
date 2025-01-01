@@ -1,7 +1,8 @@
 package com.inception.app.controller;
 
 import java.util.Map;
-import org.springframework.jdc.core.JdbcTemplate;
+import org.springframework.jdbc.core.JdbcTemplate;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
